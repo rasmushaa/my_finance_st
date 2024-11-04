@@ -1,4 +1,24 @@
 import streamlit as st
+from streamlit_javascript import st_javascript
+
+
+def __reset_st_pagestate_on_entry():
+    """ The 'pagestate' in the st.session_state
+    is used to store the State Machine State
+    on pages that require more advanced logic.
+    The state is always reseted when user inters to another page.
+    active_page is used to detect the change on page.
+    """
+    if 'pagestate' not in st.session_state:
+        st.session_state.active_page = ''
+        st.session_state.pagestate = 0
+
+    url = st_javascript("await fetch('').then(r => window.parent.location.href)")
+    page= '' if isinstance(url, int) or '/' not in url else url.rsplit('/', 1)[1]
+    print(f'Page: {page}')
+    if page != st.session_state.active_page:
+        st.session_state.active_page = page
+        st.session_state.pagestate = 0
 
 
 def __authenticated_menu():
@@ -9,7 +29,7 @@ def __authenticated_menu():
     st.sidebar.page_link(st.Page('frontend/account/logout.py'), label='Logout', icon=':material/logout:')
 
     st.sidebar.subheader('Banking Files:')
-    st.sidebar.page_link(st.Page('frontend/banking/process_file.py'), label='Process file', icon=':material/upload_file:')
+    st.sidebar.page_link(st.Page('frontend/banking/file_input.py'), label='Process file', icon=':material/upload_file:')
 
     disabled = st.session_state['user'].role != 'admin'
     st.sidebar.subheader('Manage Application:')
@@ -31,3 +51,4 @@ def init_to_user_access_level():
         __authenticated_menu()
     else:
         __unauthenticated_menu()
+    #__reset_st_pagestate_on_entry()

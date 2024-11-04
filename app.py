@@ -17,7 +17,8 @@ st.logo('frontend/assets/logo.png', size='large')
 
 all_pages = [
     st.Page('frontend/account/login.py', default=True),
-    st.Page('frontend/banking/process_file.py'),
+    st.Page('frontend/banking/file_input.py'),
+    st.Page('frontend/banking/file_parsing.py'),
     st.Page('frontend/account/logout.py'),
     st.Page('frontend/admin/categories.py')
 ]

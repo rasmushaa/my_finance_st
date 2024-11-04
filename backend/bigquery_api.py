@@ -5,11 +5,13 @@ import pandas_gbq
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
+DEBUG = True
+
 
 class BigQueryAPI():
     def __init__(self):
         self.__project_id = 'rasmus-prod'
-        self._dataset = f'st_workout_{os.getenv("STREAMLIT_ENV")}'
+        self._dataset = f'st_finance_{os.getenv("STREAMLIT_ENV")}'
         self.__location = 'europe-north1'
 
 
@@ -26,6 +28,7 @@ class BigQueryAPI():
         -------
         df : DataFrame
         '''
+        self.__debug(sql=sql)
         df = pandas_gbq.read_gbq(sql, 
                                  project_id=self.__project_id,
                                  location=self.__location, 
@@ -68,6 +71,7 @@ class BigQueryAPI():
         success: bool
             If the insert operation results any errors, those a printed and False is returned
         '''
+        self.__debug(rows=rows_to_insert, table=table)
         client = bigquery.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))),
                                  location=self.__location)
         
@@ -80,6 +84,14 @@ class BigQueryAPI():
             return False
         else:
             return True
+        
+
+    def __debug(self, **kwargs):
+        if DEBUG:
+            print(f'\nBigQueryAPI:')
+            for key, value in kwargs.items():
+                print(f'{key}:\n{value}')
+            print('\n')
         
             
         

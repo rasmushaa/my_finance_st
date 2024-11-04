@@ -14,21 +14,48 @@ class FilesAPI(BigQueryAPI):
         return df
     
 
-    def add_filetype_to_databases(self, input_file, **kwargs):
-        print('Addde file type\n')
+    def add_filetype_to_databases(self, **kwargs) -> bool:
+        kwargs['ColumnNameString'] = ','.join(kwargs['ColumnNameString'])
+        self.__client.write_rows_to_table([kwargs], 'd_filetypes')
+
+    
+    def transform_input_file(self, df: pd.DataFrame):
+        cols = df.columns.to_list()
+        col_str = ','.join(cols)
+        sql=f"""
+        SELECT
+            *
+        FROM
+            `{self.__client._dataset}.d_filetypes`
+        WHERE
+            ColumnNameString = '{col_str}'
+        """
+        filetype = self.__client.sql_to_pandas(sql).iloc[0].to_dict()
+
+        df.rename(columns={filetype['DateColumn']: 'date', filetype['ReceiverColumn']: 'receiver', filetype['AmountColumn2']: 'amount'}, inplace=True)
+
+        df['date'] = pd.to_datetime(df['date'], format=filetype['DateColumnFormat']).dt.date
+        df['amount'] = df['amount'].str.replace(',', '.').astype(float) if df['amount'].str.contains(',').any() else df['amount'].astype(float) # Decimael ',' to '.' float
+        df['category'] = 'NAN'
+
+        df = df[['date', 'receiver', 'amount', 'category']].copy()
+        df.sort_values(by='date', ascending=True, inplace=True)
+        return df
 
 
-
-    def filetype_is_in_database(self, df: pd.DataFrame):
-        columns_names = df.columns.to_list()
-        print(columns_names)
-        return False
+    def filetype_is_in_database(self, df: pd.DataFrame) -> bool:
+        cols = df.columns.to_list()
+        col_str = ','.join(cols)
         sql = f"""
         SELECT
             COUNT(*) AS count
         FROM
-            {self.__client._dataset}.d_file_types
-            """
+            `{self.__client._dataset}.d_filetypes`
+        WHERE
+            ColumnNameString = '{col_str}'
+        """
+        df = self.__client.sql_to_pandas(sql)
+        return df['count'].all() > 0
 
 
     def __autodetect_file_coding(self, file_binary) -> str:

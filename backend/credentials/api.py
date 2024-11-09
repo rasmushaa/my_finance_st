@@ -1,5 +1,5 @@
 from .user import User
-from .google_cloud_api import GoogleCloudAPI
+from backend.google_cloud.api import GoogleCloudAPI
 
 
 class CredentialsAPI():

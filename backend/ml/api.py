@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
+import datetime
 from .model import NB
-from backend.google_cloud_api import GoogleCloudAPI
+from backend.google_cloud.api import GoogleCloudAPI
 
 
 
-class MlAPI():
+class MLAPI():
     def __init__(self):
         self.__client = GoogleCloudAPI()
         self.__model = None
@@ -130,15 +131,21 @@ class MlAPI():
             return {}
         
 
-    def get_likelihoods(self):
+    def get_likelihoods(self, ntop: int = 20):
         """ Returns the likelihoods for all possible feature token
         and ascending order.
         The Dict is format likes[<target_name>][<toke>]:value
         All levels are in descending order, and all targets contain 
         all possible tokens
+
+        Inputs
+        -----
+        ntop : int
+            Select only the top n tokens
         """
         if self.__model is not None:
-            return self.__model.get_likelihoods()
+            likes = self.__model.get_likelihoods()
+            return {key: dict(list(sub_dict.items())[:ntop]) for key, sub_dict in likes.items()}
         else:
             return {}
         
@@ -165,6 +172,12 @@ class MlAPI():
         return wa, stats
     
 
+    def has_model(self):
+        """ Used to check if the model has been initialized
+        """
+        return self.__model is not None
+    
+
     def __model_get_predictions(self, data: pd.DataFrame)->dict:
         """ Run model prediction
         
@@ -174,6 +187,7 @@ class MlAPI():
             A dictionary containing all target classe in descending order of the propability
         """
         data = data.fillna('') 
+        data = data.drop(columns=[col for col in data.columns if any(isinstance(val, (datetime.date, datetime.datetime)) for val in data[col])]) # Remove the Date-type column
         X_numeric = data.select_dtypes(include=['float']).to_numpy()
         X_string = data.select_dtypes(include=['object']).to_numpy()
         preds = self.__model.predict(X_string, X_numeric)

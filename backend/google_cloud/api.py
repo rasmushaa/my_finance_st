@@ -123,7 +123,7 @@ class GoogleCloudAPI():
         client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(gcs_path)
-        blob.download_to_filename(gcs_path)
+        blob.download_to_filename(local_file_path)
         
 
     def __debug(self, **kwargs):

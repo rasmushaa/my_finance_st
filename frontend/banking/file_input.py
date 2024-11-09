@@ -1,24 +1,22 @@
 import streamlit as st
 import time
-from backend.files_api import FilesAPI
+from backend.files.api import FilesAPI
 
 
 # Utility functions
 @st.cache_data(show_spinner='Validating File entry...')
 def st_wrapper_filetype_in_database(df):
-    api = FilesAPI()
-    return api.filetype_is_in_database(df)
+    return st.session_state['api']['files'].filetype_is_in_database(df)
 
 @st.cache_data(show_spinner='Transforming the File...')
 def st_wrapper_transform_input_file(df):
-    api = FilesAPI()
-    return api.transform_input_file(df)
+    return st.session_state['api']['files'].transform_input_file(df)
 
 
 # Dymaic Visualization Funcs
 def load_file():
     if st.session_state['input_file'] is not None:
-        st.session_state['banking_file'] = FilesAPI().open_binary_as_pandas(st.session_state['input_file'])
+        st.session_state['banking_file'] = st.session_state['api']['files'].open_binary_as_pandas(st.session_state['input_file'])
 
 def validate_filetype() -> bool:
     if st_wrapper_filetype_in_database(st.session_state['banking_file']):
@@ -40,7 +38,7 @@ def validate_filetype() -> bool:
         amount_col = st_col2.selectbox('Amount-Column', cols)
 
         if st.button('Add the Filetype to the Database', use_container_width=True):
-            FilesAPI().add_filetype_to_databases(KeyFileName=file_name, 
+            st.session_state['api']['files'].add_filetype_to_databases(KeyFileName=file_name, 
                                                     DateColumn=date_col, 
                                                     DateColumnFormat=date_for, 
                                                     AmountColumn2=amount_col, 

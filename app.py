@@ -1,5 +1,9 @@
 import streamlit as st
-from frontend.utils import sidebar
+from frontend import sidebar
+from backend.categories.api import CategoriesAPI
+from backend.credentials.api import CredentialsAPI
+from backend.ml.api import MLAPI
+from backend.files.api import FilesAPI
 
 
 # Main entry-point and the event-loop, that runs only once.
@@ -11,15 +15,23 @@ from frontend.utils import sidebar
 # because that is dynamically changed in the code.
 
 
+def init_apis():
+    if 'api' not in st.session_state:
+        st.session_state['api'] = {}
+        st.session_state['api']['credentials']  = CredentialsAPI()
+        st.session_state['api']['categories']   = CategoriesAPI()
+        st.session_state['api']['ml']           = MLAPI()
+        st.session_state['api']['files']        = FilesAPI()
+
+
 # Application Constants
 st.logo('frontend/assets/logo.png', size='large')
 
-
 all_pages = [
     st.Page('frontend/account/login.py', default=True),
+    st.Page('frontend/account/logout.py'),
     st.Page('frontend/banking/file_input.py'),
     st.Page('frontend/banking/file_parsing.py'),
-    st.Page('frontend/account/logout.py'),
     st.Page('frontend/admin/ai.py'),
     st.Page('frontend/admin/categories.py')
 ]
@@ -28,8 +40,11 @@ pg = st.navigation(
     all_pages,
     position='hidden'
 )
-pg.run()
+
+init_apis() # Initialize All Backend APIs right away
 
 sidebar.init_to_user_access_level() # Update the navigation accordingly to the user access level after each reload/page switch
+
+pg.run() # Main Event Run
 
 

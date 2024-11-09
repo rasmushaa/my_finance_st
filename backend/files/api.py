@@ -1,7 +1,7 @@
 import pandas as pd
 import chardet
 import csv
-from .google_cloud_api import GoogleCloudAPI
+from backend.google_cloud.api import GoogleCloudAPI
 
 class FilesAPI(GoogleCloudAPI):
     def __init__(self):

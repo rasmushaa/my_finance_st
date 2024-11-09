@@ -1,23 +1,7 @@
 import os
 import streamlit as st
 import hashlib
-from backend.credentials_api import CredentialsAPI
-#from frontend.utils import sidebar
-from backend.user import User
-
-
-# Utility functions
-@st.cache_data
-def st_wrapper_password_check(username, password_hash):
-    api = CredentialsAPI()
-    return api.username_and_password_match(username, password_hash)
-
-@st.cache_data
-def st_wrapper_init_user(username, password_hash):
-    api = CredentialsAPI()
-    return api.init_user(username, password_hash)
-
-#sidebar.init_to_user_access_level()
+from backend.credentials.user import User
 
 
 # Dynamic Header, that indicates the ENVIRONMENT
@@ -40,10 +24,10 @@ if st.button('Login', icon=":material/login:"):
     st.switch_page('frontend/banking/file_input.py')
     st.rerun()
 
-    if st_wrapper_password_check(username, password_hash):
+    """ if st_wrapper_password_check(username, password_hash):
         st.success('Login successful')
         st.session_state['user'] = st_wrapper_init_user(username, password_hash)
         st.switch_page('frontend/banking/file_input.py')
     
     else:
-        st.error('Password and Username do not match')
+        st.error('Password and Username do not match') """

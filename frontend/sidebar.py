@@ -15,7 +15,6 @@ def __reset_st_pagestate_on_entry():
 
     url = st_javascript("await fetch('').then(r => window.parent.location.href)")
     page= '' if isinstance(url, int) or '/' not in url else url.rsplit('/', 1)[1]
-    print(f'Page: {page}')
     if page != st.session_state.active_page:
         st.session_state.active_page = page
         st.session_state.pagestate = 0
@@ -29,7 +28,7 @@ def __authenticated_menu():
     st.sidebar.page_link(st.Page('frontend/account/logout.py'), label='Logout', icon=':material/logout:')
 
     st.sidebar.subheader('Banking Files:')
-    st.sidebar.page_link(st.Page('frontend/banking/file_input.py'), label='Process file', icon=':material/upload_file:')
+    st.sidebar.page_link(st.Page('frontend/banking/file_input.py'), label='Upload file', icon=':material/upload_file:')
 
     disabled = st.session_state['user'].role != 'admin'
     st.sidebar.subheader('Manage Application:')

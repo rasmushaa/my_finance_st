@@ -1,11 +1,11 @@
 import pandas as pd
 import chardet
 import csv
-from .bigquery_api import BigQueryAPI
+from .google_cloud_api import GoogleCloudAPI
 
-class FilesAPI(BigQueryAPI):
+class FilesAPI(GoogleCloudAPI):
     def __init__(self):
-        self.__client = BigQueryAPI()
+        self.__client = GoogleCloudAPI()
 
 
     def open_binary_as_pandas(self, input_file) -> pd.DataFrame:

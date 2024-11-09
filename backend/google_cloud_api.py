@@ -3,12 +3,13 @@ import json
 import pandas as pd
 import pandas_gbq
 from google.cloud import bigquery
+from google.cloud import storage
 from google.oauth2 import service_account
 
 DEBUG = True
 
 
-class BigQueryAPI():
+class GoogleCloudAPI():
     def __init__(self):
         self.__project_id = 'rasmus-prod'
         self._dataset = f'st_finance_{os.getenv("STREAMLIT_ENV")}'
@@ -85,10 +86,49 @@ class BigQueryAPI():
         else:
             return True
         
+    
+    def upload_file_to_gcs(self, local_file_path: str):
+        ''' Upload Local File to GCS
+        
+        The Bucker and folder are project specific,
+        and only the <local_file_path> is required
+
+        Inputs
+        ------
+        local_file_path : str
+            Name/Dir of the file to be uploaded with the same dir
+        '''
+        bucket_name = 'streamlit-app-assets'
+        gcs_path = f'my_finance_st/{local_file_path}'
+
+        client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.blob(gcs_path)
+        blob.upload_from_filename(local_file_path) 
+
+    
+    def download_file_from_gcs(self, local_file_path: str):
+        ''' Download a file from GCS to local filesystem.
+
+        The direcotry is the same on the both platforms
+        
+        Inputs
+        ------
+        local_file_path : str
+            Name/Dir of the file to be downloaded with the same dir
+        '''
+        bucket_name = 'streamlit-app-assets'
+        gcs_path = f'my_finance_st/{local_file_path}'
+
+        client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.blob(gcs_path)
+        blob.download_to_filename(gcs_path)
+        
 
     def __debug(self, **kwargs):
         if DEBUG:
-            print(f'\nBigQueryAPI:')
+            print(f'\nGoogleCloudAPI:')
             for key, value in kwargs.items():
                 print(f'{key}:\n{value}')
             print('\n')

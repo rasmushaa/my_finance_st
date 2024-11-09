@@ -20,6 +20,7 @@ all_pages = [
     st.Page('frontend/banking/file_input.py'),
     st.Page('frontend/banking/file_parsing.py'),
     st.Page('frontend/account/logout.py'),
+    st.Page('frontend/admin/ai.py'),
     st.Page('frontend/admin/categories.py')
 ]
 

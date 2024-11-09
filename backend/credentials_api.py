@@ -1,10 +1,10 @@
 from .user import User
-from .bigquery_api import BigQueryAPI
+from .google_cloud_api import GoogleCloudAPI
 
 
 class CredentialsAPI():
     def __init__(self):
-        self.__client = BigQueryAPI()
+        self.__client = GoogleCloudAPI()
 
     def username_and_password_match(self, username, password_hash) -> bool:
         sql = f"""

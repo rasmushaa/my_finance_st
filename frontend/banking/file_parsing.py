@@ -72,11 +72,11 @@ edited_df = st.data_editor(
 
 if st.button('Upload the file', use_container_width=True):
 
-    if st.session_state['api']['files'].date_not_in_database(edited_df['date'].min()): # Check for duplicated Dates
+    if st.session_state['api']['files'].date_not_in_database(edited_df['date'].min(), user_name=st.session_state['user'].name): # Check for duplicated Dates
         push_data()
 
     else:
-        st.error(f"There already exists DATE after '{edited_df['date'].min()}' and new data can not be uploaded!")
+        st.error(f"There already exists DATE after '{edited_df['date'].min()}' for user '{st.session_state['user'].name}'")
 
         st.button('Force Push Data?', on_click=push_data, use_container_width=True)
 

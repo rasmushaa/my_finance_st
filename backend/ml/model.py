@@ -48,7 +48,7 @@ class NB():
                 likes = [self._likelihoods[target][feature] for feature in str_row if feature in self._likelihoods[target]]
                 posterrior = np.log(likes).sum() + np.log(self._priors[target])
                 #print(f'Post {posterrior:.1f}, Prior {np.log(self._priors[target]):.1f}, Likely {np.log(likes).sum():.1f}, Probs {np.log(probs).sum():.1f}')
-                target_values.update({target: posterrior})   
+                target_values.update({target: np.exp(posterrior)})   
             labels = {self._y_decode[k]: v for k, v in sorted(target_values.items(), key=lambda item: item[1], reverse=True)}
             predictions.append(labels)
         return predictions

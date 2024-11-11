@@ -16,43 +16,41 @@ class MLAPI():
         self.__nan = 'N/A'
 
 
-    def predict(self, data: pd.DataFrame, relative_error_th: float):
+    def predict(self, data: pd.DataFrame):
         """ Reuturns the predicted target Classes.
         
         The model returns a dict containing all the classes,
-        in descending order, and only the first class
-        is selected, if it has large nough propability
-        compared to the second suggestion.
-        If there is no clear winner, <self.__nan> is applied to that element
+        in descending order, The first class is selected,
+        and the prortional probability to the total pool 
+        is also returned.
 
         Inputs
         -----
         data: pd.DataFrame
             Input X Features
 
-        relative_error_th : float
-            Required deviation between the first, and second prediction to use the provided suggestion.
-        
         Returns
         -------
         y_predicted: list
             Model y ouputs. If model is not loaded, fill all values by <self.__nan>
+
+        realative_pob: list
+            The Prob of returned classe, in relation to the total pool
         """
         if self.__model is None:
-            return [self.__nan] * len(data)
+            return [self.__nan] * len(data), [0] * len(data)
         
         preds = self.__model_get_predictions(data)
 
-        def filter_clear_winner(pred_dict, relative_error_th):
-            # Check if the highest probability exceeds the second highest by the threshold
-            keys = list(pred_dict.keys())
-            if pred_dict[keys[0]] / (pred_dict[keys[0]] - pred_dict[keys[1]]) >= relative_error_th:
-                return keys[0]
-            else:
-                return self.__nan
+        def relative_prob(pred_dict):
+            target_prob = next(iter(pred_dict.values()))
+            total_prob = sum(pred_dict.values())
+            return target_prob / total_prob
 
-        filtered_preds = [filter_clear_winner(pred_dict, relative_error_th) for pred_dict in preds]
-        return filtered_preds
+        probs= [relative_prob(pred_dict) for pred_dict in preds]
+        targets = [next(iter(pred_dict.keys())) for pred_dict in preds]
+
+        return targets, probs
 
 
     def pull_training_data(self):

@@ -40,7 +40,10 @@ class GoogleCloudAPI():
 
     def write_pandas_to_table(self, df: pd.DataFrame, table: str):
         ''' Push a DataFrame to BigQuery.
-        A new table will be create, if the destination does not exists.
+
+        A new table will be create, if the destination does not exists,
+        however, pyarrows has a bug and it fails for datetime columns,
+        thus the schema must be constructed manually from pandas to GBQ format.
         The mode is locked to Append only, to prevent accidental overwrites
         
         Inputs
@@ -50,15 +53,31 @@ class GoogleCloudAPI():
         table : str
             The name of destination Table, that is used together with initial project parameters
         '''
+        table_schema = [] # [{'name': 'col1', 'type': 'STRING'},...]
+        for col in df.columns:
+            if 'date' in col.lower():
+                 table_schema.append({'name': col, 'type': 'DATE'})
+            elif 'object' in str(df[col].dtype):
+                 table_schema.append({'name': col, 'type': 'STRING'})
+            elif 'float' in str(df[col].dtype):
+                table_schema.append({'name': col, 'type': 'FLOAT64'})
+            elif 'datetime' in str(df[col].dtype):
+                table_schema.append({'name': col, 'type': 'TIMESTAMP'})
+
         pandas_gbq.to_gbq(df, 
                           destination_table=f'{self._dataset}.{table}',
                           project_id=self.__project_id, 
                           location=self.__location, 
-                          if_exists='append')
+                          table_schema=table_schema,
+                          if_exists='append',
+                          credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT')))
+                          )
     
 
     def write_rows_to_table(self, rows_to_insert: list, table: str) -> bool:
-        ''' Write rows to an existing table
+        ''' Write rows to an existing table.
+
+        Note, writing one row from the list may fail, but others are completed successfully.
         
         Inputs
         ------

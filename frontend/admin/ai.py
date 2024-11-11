@@ -1,5 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
+from frontend.utils import valid_user_state
+
+valid_user_state()
 
 
 # Utility

@@ -1,6 +1,8 @@
 import streamlit as st
 import time
-from backend.files.api import FilesAPI
+from frontend.utils import valid_user_state
+
+valid_user_state()
 
 
 # Utility functions

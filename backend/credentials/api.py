@@ -1,3 +1,4 @@
+import re
 from .user import User
 from backend.google_cloud.api import GoogleCloudAPI
 
@@ -7,6 +8,8 @@ class CredentialsAPI():
         self.__client = GoogleCloudAPI()
 
     def username_and_password_match(self, username, password_hash) -> bool:
+        if not self.__is_valid_username(username):
+            return False
         sql = f"""
         SELECT 
             COUNT(*) AS ct
@@ -23,6 +26,8 @@ class CredentialsAPI():
         
     
     def init_user(self, username, password_hash) -> User:
+        if not self.__is_valid_username(username):
+            return User(-1, '', '', False)
         sql = f"""
         SELECT
             KeyUserId,
@@ -39,6 +44,11 @@ class CredentialsAPI():
             return User(id=df['KeyUserId'][0] ,name=df['UserName'][0], role=df['Role'][0], is_logged_in=True)
         else:
             return User(-1, '', '', False)
+        
+    
+    def __is_valid_username(user_input: str):
+        # Allow only alphanumeric characters and underscores
+        return re.match(r"^[a-zA-Z0-9_]+$", user_input) is not None
         
     
 

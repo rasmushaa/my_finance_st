@@ -1,4 +1,7 @@
 import streamlit as st
+from frontend.utils import valid_user_state
+
+valid_user_state()
 
 
 

@@ -40,10 +40,11 @@ def validate_filetype() -> bool:
         amount_col = st_col2.selectbox('Amount-Column', cols)
 
         if st.button('Add the Filetype to the Database', use_container_width=True):
-            st.session_state['api']['files'].add_filetype_to_databases(KeyFileName=file_name, 
+            st.session_state['api']['files'].add_filetype_to_databases(
+                                                    KeyFileName=file_name, 
                                                     DateColumn=date_col, 
                                                     DateColumnFormat=date_for, 
-                                                    AmountColumn2=amount_col, 
+                                                    AmountColumn=amount_col, 
                                                     ReceiverColumn=receiver_col, 
                                                     ColumnNameString=cols)
             

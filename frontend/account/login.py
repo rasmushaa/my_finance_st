@@ -5,14 +5,16 @@ import random
 from frontend.utils import init_random_captcha_color,  validate_captcha_color
 from backend.credentials.user import User
 
-
+##### OVERRIDE LOGIN FOR TESTING #####
+st.session_state['user'] = User(id=1, name='AdminName', role='admin', is_logged_in=True) 
+st.switch_page('frontend/banking/file_input.py')
 
 # Dynamic Header, that indicates the ENVIRONMENT
 env = os.getenv('STREAMLIT_ENV')
 env_siffix = '' if env=='prod' else ': STG' if env=='stg' else ': DEV' if env=='dev' else 'EnvVariable NotFound!' 
 col1, col2 = st.columns([3, 1])
 col1.title(f'My Finance App{env_siffix}')
-col2.image('frontend/assets/logo.png')
+col2.image('frontend/app_assets/logo.png')
 
 
 # User login input, that hashes the password
@@ -33,14 +35,10 @@ if st.button('Login', icon=":material/login:"):
 
     validate_captcha_color(user_rgb_color, target_rgb, draw_new_color_if_failed=True)
 
-    ##### OVERRIDE LOGIN FOR TESTING #####
-    st.session_state['user'] = User(id=1, name='AdminName', role='admin', is_logged_in=True) 
-    st.switch_page('frontend/banking/file_input.py')
-
-    """ if st_wrapper_password_check(username, password_hash):
+    if st.session_state['api']['credentials'].username_and_password_match(username, password_hash):
         st.success('Login successful')
-        st.session_state['user'] = st_wrapper_init_user(username, password_hash)
+        st.session_state['user'] = st.session_state['api']['credentials'].init_user(username, password_hash)
         st.switch_page('frontend/banking/file_input.py')
     
     else:
-        st.error('Password and Username do not match') """
+        st.error('Password and Username do not match')

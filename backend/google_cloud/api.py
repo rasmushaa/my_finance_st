@@ -11,9 +11,11 @@ DEBUG = True
 
 class GoogleCloudAPI():
     def __init__(self):
-        self.__project_id = 'rasmus-prod'
-        self._dataset = f'st_finance_{os.getenv("STREAMLIT_ENV")}'
-        self.__location = 'europe-north1'
+        self.__project_id = os.getenv('GCP_PROJECT_ID')
+        self._dataset = os.getenv('GCP_BQ_DATASET_BASE') + os.getenv('STREAMLIT_ENV')
+        self.__location = os.getenv('GCP_LOCATION')
+        self.__bucket_name = os.getenv('GCP_CGS_BUCKET')
+        self.__bucket_base_dir = os.getenv('GCP_CGS_BUCKET_BASE_DIR')
 
 
     def sql_to_pandas(self, sql: str) -> pd.DataFrame:
@@ -117,11 +119,10 @@ class GoogleCloudAPI():
         local_file_path : str
             Name/Dir of the file to be uploaded with the same dir
         '''
-        bucket_name = 'streamlit-app-assets'
-        gcs_path = f'my_finance_st/{local_file_path}'
+        gcs_path = self.__bucket_base_dir + local_file_path
 
         client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.get_bucket(self.__bucket_name)
         blob = bucket.blob(gcs_path)
         blob.upload_from_filename(local_file_path) 
 
@@ -136,11 +137,10 @@ class GoogleCloudAPI():
         local_file_path : str
             Name/Dir of the file to be downloaded with the same dir
         '''
-        bucket_name = 'streamlit-app-assets'
-        gcs_path = f'my_finance_st/{local_file_path}'
+        gcs_path = self.__bucket_base_dir + local_file_path
 
         client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
-        bucket = client.get_bucket(bucket_name)
+        bucket = client.get_bucket(self.__bucket_name)
         blob = bucket.blob(gcs_path)
         blob.download_to_filename(local_file_path)
         

@@ -2,6 +2,8 @@ import pandas as pd
 import chardet
 import csv
 from backend.google_cloud.api import GoogleCloudAPI
+from backend.categories.api import CategoriesAPI
+from .data_collector import DataCollector
 
 class FilesAPI(GoogleCloudAPI):
     def __init__(self):
@@ -53,18 +55,68 @@ class FilesAPI(GoogleCloudAPI):
         user_name: str
             The current active user
         '''
-        df['category'] = df['category'].fillna('N/A') # Different missing values can have multiple values: Nan, Empty, etc. Thus, 'N/A' is selected to handle this
-        df['user'] = user_name
-        df['commit_timestamp'] = pd.Timestamp('now', tz='Europe/Helsinki')
-        df = df[['user', 'date', 'amount', 'receiver', 'category', 'commit_timestamp']]
+        df['Category'] = df['Category'].fillna('N/A') # Different missing values can have multiple values: Nan, Empty, etc. Thus, 'N/A' is selected to handle this
+        df['KeyUser'] = user_name
+        df['CommitTimestamp'] = pd.Timestamp('now', tz='Europe/Helsinki')
+        df = df[['KeyDate', 'KeyUser', 'Amount', 'Receiver', 'Category', 'CommitTimestamp']]
         try:
             self.__client.write_pandas_to_table(df, 'f_transactions')
         except:
             return False
         return True
+    
+
+    def add_assets_to_database(self, date, user_name, collector) -> bool:
+        ''' Insert new Quarter for a user
+        
+        Inputs
+        ------
+        date : Date object
+            The insertation date selected by a user. The qurter level is used on the reporting level
+        user_name : str
+            User name key for table aggregation
+        collector
+            DataCollector object with filled values from GUI
+
+        Returns
+        -------
+        Inseration success
+        '''
+        if not collector.no_nones(): # User must have inputted something to all possible entries
+            return False
+        
+        df_collection = collector.to_dataframe()
+
+        df = pd.DataFrame(columns=['KeyDate', 'KeyUser', 'Category', 'Explanation', 'Value'])
+        df['Category'] = df_collection['key'].str.upper().str.replace('_', '-') # Keys back to BigQuery format
+        df['Value'] = df_collection['value']
+        df['KeyDate'] = date
+        df['KeyUser'] = user_name
+        df['CommitTimestamp'] = pd.Timestamp('now', tz='Europe/Helsinki')
+
+        try:
+            self.__client.write_pandas_to_table(df, 'f_assets')
+        except:
+            return False
+        return True
+    
+
+    def get_asset_data_collector(self):
+        ''' Init a class that has possble data entrys
+        as member variables.
+
+        Returns
+        -------
+        DataCollector() with Asset-categories
+        '''
+        assets = CategoriesAPI().get_asset_categories()
+        assets = [asset.replace('-', '_').lower() for asset in assets] # ASSETS-ARE-IN-THIS-FORMAT, and must_formatted_for_python
+        collector = DataCollector()
+        collector.add_from_list(assets)
+        return collector
 
 
-    def date_not_in_database(self, date, user_name: str):
+    def date_not_in_transactions_table(self, date, user_name: str):
         ''' Prevent from adding multiple same banking files to the database.
         The date validation is user specific.
         
@@ -77,16 +129,36 @@ class FilesAPI(GoogleCloudAPI):
         '''
         sql = f'''
         SELECT
-            MAX(date) AS date
+            MAX(KeyDate) AS date
         FROM
             {self.__client._dataset}.f_transactions
         WHERE
-            user = '{user_name}'
+            KeyUser = '{user_name}'
         '''
-        try:
-            results = self.__client.sql_to_pandas(sql) # The Query Fails if the table does not exist -> return True instead
-        except:
-            return True
+        results = self.__client.sql_to_pandas(sql) # The Query Fails if the table does not exist -> return True instead
+        return date > results['date'][0]
+    
+
+    def date_not_in_assets_table(self, date, user_name: str):
+        ''' Prevent from adding multiple same assets files to the database.
+        The date validation is user specific.
+        
+        Inputs
+        ------
+        date: datetime
+            The asset File date
+        user_name: str
+            The current active user
+        '''
+        sql = f'''
+        SELECT
+            MAX(KeyDate) AS date
+        FROM
+            {self.__client._dataset}.f_assets
+        WHERE
+            KeyUser = '{user_name}'
+        '''
+        results = self.__client.sql_to_pandas(sql)
         return date > results['date'][0]
 
     
@@ -114,14 +186,14 @@ class FilesAPI(GoogleCloudAPI):
         """
         filetype = self.__client.sql_to_pandas(sql).iloc[0].to_dict()
 
-        df.rename(columns={filetype['DateColumn']: 'date', filetype['ReceiverColumn']: 'receiver', filetype['AmountColumn2']: 'amount'}, inplace=True)
+        df.rename(columns={filetype['DateColumn']: 'KeyDate', filetype['ReceiverColumn']: 'Receiver', filetype['AmountColumn']: 'Amount'}, inplace=True)
 
-        df['date'] = pd.to_datetime(df['date'], format=filetype['DateColumnFormat']).dt.date
-        df['amount'] = df['amount'].str.replace(',', '.').astype(float) if df['amount'].str.contains(',').any() else df['amount'].astype(float) # Decimael ',' to '.' float
-        df['category'] = None
+        df['KeyDate'] = pd.to_datetime(df['KeyDate'], format=filetype['DateColumnFormat']).dt.date
+        df['Amount'] = df['Amount'].str.replace(',', '.').astype(float) if df['Amount'].str.contains(',').any() else df['Amount'].astype(float) # Decimael ',' to '.' float
+        df['Category'] = None
 
-        df = df[['date', 'amount', 'receiver', 'category']].copy()
-        df.sort_values(by='date', ascending=True, inplace=True)
+        df = df[['KeyDate', 'Amount', 'Receiver', 'Category']].copy()
+        df.sort_values(by='KeyDate', ascending=True, inplace=True)
         return df
 
 

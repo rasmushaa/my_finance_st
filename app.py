@@ -25,13 +25,15 @@ def init_apis():
 
 
 # Application Constants
-st.logo('frontend/assets/logo.png', size='large')
+st.set_page_config(page_title='My Finance')
+st.logo('frontend/app_assets/logo.png', size='large')
 
 all_pages = [
     st.Page('frontend/account/login.py', default=True),
     st.Page('frontend/account/logout.py'),
     st.Page('frontend/banking/file_input.py'),
     st.Page('frontend/banking/file_parsing.py'),
+    st.Page('frontend/assets/uppload_file.py'),
     st.Page('frontend/admin/ai.py'),
     st.Page('frontend/admin/categories.py')
 ]

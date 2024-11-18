@@ -27,8 +27,9 @@ def __authenticated_menu():
     st.sidebar.subheader('Account:')
     st.sidebar.page_link(st.Page('frontend/account/logout.py'), label='Logout', icon=':material/logout:')
 
-    st.sidebar.subheader('Banking Files:')
-    st.sidebar.page_link(st.Page('frontend/banking/file_input.py'), label='Upload file', icon=':material/upload_file:')
+    st.sidebar.subheader('Uppload Files:')
+    st.sidebar.page_link(st.Page('frontend/banking/file_input.py'), label='Transactions', icon=':material/payments:')
+    st.sidebar.page_link(st.Page('frontend/assets/uppload_file.py'), label='Assets', icon=':material/account_balance:')
 
     disabled = st.session_state['user'].role != 'admin'
     st.sidebar.subheader('Manage Application:')

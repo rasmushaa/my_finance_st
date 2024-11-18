@@ -12,7 +12,7 @@ class MLAPI():
     def __init__(self):
         self.__client = GoogleCloudAPI()
         self.__model = None
-        self.__model_name = f'{os.getenv('STREAMLIT_ENV')}_naive_bayes.pkl'
+        self.__model_name = os.getenv('STREAMLIT_ENV') + '_naive_bayes.pkl'
         self.__nan = 'N/A'
 
 

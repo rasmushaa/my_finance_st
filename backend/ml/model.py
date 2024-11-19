@@ -112,14 +112,12 @@ class NB():
     def _compute_likelihoods(self, X_str: np.array, y: np.array):
         targets = np.unique(y)
         for target in targets:
-            sub_set = X_str[y[:] == target]
-            sub_set = sub_set[(sub_set != -1)]
-            features, counts = np.unique(sub_set, return_counts=True)
-            known_unkowns = [k for k in self._X_decode if k not in features]
+            sub_set = X_str[y[:] == target] # All rows for one target
+            features = np.unique(sub_set[(sub_set != -1)]) # Do not include paddings
+            known_unkowns = [k for k in self._X_decode if k not in features] # Add missing tokens for current target
             features = np.concatenate((features, known_unkowns), axis=0)
-            counts = np.concatenate((counts, np.ones(len(known_unkowns))), axis=0)
-            events = (sub_set != -1).sum() + len(known_unkowns)
-            probs = counts / events
+            events = sub_set.shape[0]
+            probs = [(np.sum(np.any(sub_set == token, axis=1)) + 1) / (events + 1) for token in features] # Propability too see token, given the target (rows with specific toke / total rows) (+1 to inlcude also missing values)
             likelihood = {features: prob for features, prob in zip(features, probs)} 
             self._likelihoods.update({target: likelihood})
 

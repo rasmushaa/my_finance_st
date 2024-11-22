@@ -32,9 +32,9 @@ def main():
     else:
         raise ValueError(f'No path: {dotenv_file}')
     
-    project_id = os.getenv('GCP_PROJECT_ID')
-    dataset_id = f"st_workout_{sys.argv[1]}"
-    location = 'europe-north1'
+    project_id  = os.getenv('GCP_PROJECT_ID')
+    location    = os.getenv('GCP_LOCATION')
+    dataset_id  = os.getenv('GCP_BQ_DATASET_BASE') + sys.argv[1]
   
 
     # 3. Initializea BigQuery client object for Creating Non-Existant Databasets/Tables
@@ -54,20 +54,46 @@ def main():
 
     # 5. Create Credentials table
     schema = [
-    bigquery.SchemaField('KeyUserId',       'INTEGER',  mode="REQUIRED"),
-    bigquery.SchemaField('UserName',        'STRING',   mode="REQUIRED"),
-    bigquery.SchemaField('Role',            'STRING',   mode="REQUIRED"),
-    bigquery.SchemaField('PasswordHash',    'STRING',   mode="REQUIRED"),
+    bigquery.SchemaField('KeyUserId',       'INTEGER',  mode='REQUIRED'),
+    bigquery.SchemaField('UserName',        'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('Role',            'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('PasswordHash',    'STRING',   mode='REQUIRED'),
     ]
     __create_table(dataset, 'd_credentials', schema, client)
 
 
-    # 6. Create Excercise Names table
+    # 6. Create Category Names table for all categories
     schema = [
-    bigquery.SchemaField('KeyWorkoutId',  'INTEGER',  mode="REQUIRED"),
-    bigquery.SchemaField('WorkoutName',   'STRING',   mode="REQUIRED"),
+    bigquery.SchemaField('KeyId',       'INTEGER',  mode='REQUIRED'),
+    bigquery.SchemaField('Type',        'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('Name',        'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('Explanation', 'STRING',   mode='REQUIRED'),
     ]
-    __create_table(dataset, 'd_workout', schema, client)
+    __create_table(dataset, 'd_category', schema, client)
+
+
+    # 7. Create Knwon Filetypes table
+    schema = [
+    bigquery.SchemaField('KeyFileName',         'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('DateColumn',          'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('DateColumnFormat',    'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('AmountColumn',        'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('ReceiverColumn',      'STRING',   mode='REQUIRED'),
+    bigquery.SchemaField('ColumnNameString',    'STRING',   mode='REQUIRED'),
+    ]
+    __create_table(dataset, 'd_filetypes', schema, client)
+
+
+    # 8. Create the Main Transactions table
+    schema = [
+    bigquery.SchemaField('KeyDate',         'DATE',         mode='REQUIRED'),
+    bigquery.SchemaField('KeyUser',         'STRING',       mode='REQUIRED'),
+    bigquery.SchemaField('Amount',          'FLOAT',        mode='REQUIRED'),
+    bigquery.SchemaField('Receiver',        'STRING',       mode='REQUIRED'),
+    bigquery.SchemaField('Category',        'STRING',       mode='REQUIRED'),
+    bigquery.SchemaField('CommitTimestamp', 'TIMESTAMP',    mode='REQUIRED'),
+    ]
+    __create_table(dataset, 'f_transactions', schema, client)
 
 
 

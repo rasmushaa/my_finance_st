@@ -26,5 +26,5 @@ class User():
     def is_admin(self):
         return self.__role == 'admin'
     
-    def log_out(self):
+    def logout(self):
         self.__is_logged_in = False

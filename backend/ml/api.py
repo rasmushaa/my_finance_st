@@ -99,24 +99,30 @@ class MLAPI():
         self.__model = nb
 
 
-    def save_model_to_gcs(self):
+    def save_model_to_gcs(self) -> bool:
         """ Save a model to a file locally using pickle 
         and upload it to Google Cloud Storage with corresponding ENV prefix
         """
         with open(self.__model_name, 'wb') as f: # Save the model locally
             pickle.dump(self.__model, f)
+        try:
+            self.__client.upload_file_to_gcs(self.__model_name) # Initialize a GCS client and upload the file
+            return True
+        except:
+            return False
 
-        self.__client.upload_file_to_gcs(self.__model_name) # Initialize a GCS client and upload the file
-
-
-    def load_model_from_gcs(self):
+    def load_model_from_gcs(self) -> bool:
         """ Download a model from GCS to the local filesystem,
         and pickle load it.
         """
-        self.__client.download_file_from_gcs(self.__model_name) # Pull the file from GCS to Local system
+        try:
+            self.__client.download_file_from_gcs(self.__model_name) # Pull the file from GCS to Local system
 
-        with open(self.__model_name,'rb') as f: # Open the local File
-            self.__model = pickle.load(f)
+            with open(self.__model_name,'rb') as f: # Open the local File
+                self.__model = pickle.load(f)
+            return True
+        except:
+            return False
 
 
     def get_priors(self) -> dict:

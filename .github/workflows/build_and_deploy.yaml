@@ -52,7 +52,7 @@ jobs:
           --region ${{ secrets.GCP_LOCATION }} \
           --port 8080 \
           --memory 512Mi \
-          --cpu 0.25 \
+          --cpu 1 \
           --max-instances 1 \
           --project ${{ secrets.GCP_PROJECT_ID  }} \
           --service-account ${{ secrets.GCP_MY_FINANCE_SA_NAME }} \

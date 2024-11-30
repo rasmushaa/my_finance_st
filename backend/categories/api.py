@@ -14,7 +14,7 @@ class CategoriesAPI():
         FROM 
             {self.__client._dataset}.d_category
         WHERE
-            Type = 'expenditure'
+            Type = 'transaction'
         GROUP BY
             1 -- Group for case of duplication
         """

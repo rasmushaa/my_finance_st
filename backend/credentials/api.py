@@ -46,10 +46,9 @@ class CredentialsAPI():
             return User(-1, '', '', False)
         
     
-    def __is_valid_username(user_input: str):
+    def __is_valid_username(self, user_input: str):
         # Allow only alphanumeric characters and underscores
         return re.match(r"^[a-zA-Z0-9_]+$", user_input) is not None
-        
     
 
 

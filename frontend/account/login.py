@@ -1,13 +1,8 @@
 import os
 import streamlit as st
 import hashlib
-import random
 from frontend.utils import init_random_captcha_color,  validate_captcha_color
-from backend.credentials.user import User
 
-##### OVERRIDE LOGIN FOR TESTING #####
-st.session_state['user'] = User(id=1, name='AdminName', role='admin', is_logged_in=True) 
-st.switch_page('frontend/banking/file_input.py')
 
 # Dynamic Header, that indicates the ENVIRONMENT
 env = os.getenv('STREAMLIT_ENV')

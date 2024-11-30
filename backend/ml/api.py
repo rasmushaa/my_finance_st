@@ -3,7 +3,7 @@ import numpy as np
 import os
 import pickle
 import datetime
-from .model import NB
+from backend.ml.model import NB
 from backend.google_cloud.api import GoogleCloudAPI
 
 
@@ -58,12 +58,12 @@ class MLAPI():
         """
         sql=f"""
         SELECT
-            date,
-            receiver,
-            amount,
-            category
+            KeyDate as date,
+            Receiver as receiver,
+            Amount as amount,
+            Category as category
         FROM
-            finance.transactions
+            {self.__client._dataset}.f_transactions
         """
         df = self.__client.sql_to_pandas(sql)
         df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d').dt.date

@@ -72,6 +72,7 @@ edited_df = st.data_editor(
     height=35*len(st.session_state['banking_file'])+38
 )
 
+
 if st.button('Upload the file', use_container_width=True):
 
     if st.session_state['api']['files'].date_not_in_transactions_table(edited_df['KeyDate'].min(), user_name=st.session_state['user'].name): # Check for duplicated Dates

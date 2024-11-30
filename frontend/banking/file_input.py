@@ -30,26 +30,24 @@ def validate_filetype() -> bool:
         st.warning('Unknown FileType, please add the required information:')
 
         cols = st.session_state['banking_file'].columns.to_list()
+        collector = st.session_state['api']['files'].get_filetype_data_collector()
 
-        # user inputs
-        file_name = st.text_input(label='Give a FileType Name')
+        # User inputs
         st_col1, st_col2 = st.columns(2)
-        date_col = st_col1.selectbox('Date-Column', cols)
-        date_for = st_col1.selectbox('Date-Format', ['%Y-%m-%d', '%d.%m.%Y', '%m/%d/%Y'])
-        receiver_col = st_col2.selectbox('Receiver-Column', cols)
-        amount_col = st_col2.selectbox('Amount-Column', cols)
+        collector.KeyFileName = st.text_input(label='Give a FileType Name' ,placeholder='FileX')
+        collector.DateColumn = st_col1.selectbox('Date-Column', cols)
+        collector.DateColumnFormat = st_col1.selectbox('Date-Format', ['%Y-%m-%d', '%d.%m.%Y', '%m/%d/%Y'])
+        collector.ReceiverColumn = st_col2.selectbox('Receiver-Column', cols)
+        collector.AmountColumn = st_col2.selectbox('Amount-Column', cols)
+        collector.ColumnNameString = ','.join(cols)
 
         if st.button('Add the Filetype to the Database', use_container_width=True):
-            st.session_state['api']['files'].add_filetype_to_databases(
-                                                    KeyFileName=file_name, 
-                                                    DateColumn=date_col, 
-                                                    DateColumnFormat=date_for, 
-                                                    AmountColumn=amount_col, 
-                                                    ReceiverColumn=receiver_col, 
-                                                    ColumnNameString=cols)
-            
-            st_wrapper_filetype_in_database.clear(st.session_state['banking_file']) # Clear for rerunning
-            return True
+            if st.session_state['api']['files'].add_filetype_to_databases(collector):    
+                st_wrapper_filetype_in_database.clear(st.session_state['banking_file']) # Clear for rerunning
+                st.success('The filetype was uploaded succesfully')
+                return True
+            else:
+                st.error('The filetype was not added succesfully!')
 
         st.subheader('Your Banking File')
         st.dataframe(st.session_state['banking_file'])

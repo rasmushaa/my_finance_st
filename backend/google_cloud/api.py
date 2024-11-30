@@ -1,21 +1,19 @@
 import os
-import json
 import pandas as pd
 import pandas_gbq
 from google.cloud import bigquery
 from google.cloud import storage
-from google.oauth2 import service_account
 
-DEBUG = True
+DEBUG = False
 
 
 class GoogleCloudAPI():
     def __init__(self):
         self.__project_id = os.getenv('GCP_PROJECT_ID')
-        self._dataset = os.getenv('GCP_BQ_DATASET_BASE') + os.getenv('STREAMLIT_ENV')
+        self._dataset = os.getenv('GCP_BQ_DATASET') + '_' +  os.getenv('STREAMLIT_ENV')
         self.__location = os.getenv('GCP_LOCATION')
         self.__bucket_name = os.getenv('GCP_CGS_BUCKET')
-        self.__bucket_base_dir = os.getenv('GCP_CGS_BUCKET_BASE_DIR')
+        self.__bucket_dir = os.getenv('GCP_CGS_BUCKET_DIR')
 
 
     def sql_to_pandas(self, sql: str) -> pd.DataFrame:
@@ -35,8 +33,7 @@ class GoogleCloudAPI():
         df = pandas_gbq.read_gbq(sql, 
                                  project_id=self.__project_id,
                                  location=self.__location, 
-                                 credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))), 
-                                 progress_bar_type=None)
+                                 progress_bar_type=None) # Use default Account/Cloud Run SA
         return df
     
 
@@ -72,8 +69,7 @@ class GoogleCloudAPI():
                           location=self.__location, 
                           table_schema=table_schema,
                           if_exists='append',
-                          credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT')))
-                          )
+                          ) # Use default Account/Cloud Run SA
     
 
     def write_rows_to_table(self, rows_to_insert: list, table: str) -> bool:
@@ -94,8 +90,7 @@ class GoogleCloudAPI():
             If the insert operation results any errors, those a printed and False is returned
         '''
         self.__debug(rows=rows_to_insert, table=table)
-        client = bigquery.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))),
-                                 location=self.__location)
+        client = bigquery.Client(location=self.__location) # Use default Account/Cloud Run SA
         
         table_id = f'{self.__project_id }.{self._dataset}.{table}'
 
@@ -119,9 +114,9 @@ class GoogleCloudAPI():
         local_file_path : str
             Name/Dir of the file to be uploaded with the same dir
         '''
-        gcs_path = self.__bucket_base_dir + local_file_path
+        gcs_path = os.path.join(self.__bucket_dir, local_file_path)
 
-        client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
+        client = storage.Client() # Use default Account/Cloud Run SA
         bucket = client.get_bucket(self.__bucket_name)
         blob = bucket.blob(gcs_path)
         blob.upload_from_filename(local_file_path) 
@@ -137,9 +132,9 @@ class GoogleCloudAPI():
         local_file_path : str
             Name/Dir of the file to be downloaded with the same dir
         '''
-        gcs_path = self.__bucket_base_dir + local_file_path
+        gcs_path = os.path.join(self.__bucket_dir, local_file_path)
 
-        client = storage.Client(credentials=service_account.Credentials.from_service_account_info(json.loads(os.getenv('GCP_SERVICE_ACCOUNT'))))
+        client = storage.Client() # Use default Account/Cloud Run SA
         bucket = client.get_bucket(self.__bucket_name)
         blob = bucket.blob(gcs_path)
         blob.download_to_filename(local_file_path)

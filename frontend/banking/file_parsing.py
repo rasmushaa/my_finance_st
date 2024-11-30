@@ -17,15 +17,13 @@ def predict():
 def highlight_rows(row):
     return ['background-color: grey' if i % 2 != 0 else '' for i in range(len(row))]
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def get_categories():
-    # Get ordered list of old categories by the Prior, and add any new categories to the end of it
     all_categories = st.session_state['api']['categories'].get_expenditure_categories()
-    priors = st.session_state['api']['ml'].get_priors()
-    prior_keys = list(priors.keys())
-    missing_cateogries = [item for item in all_categories if item not in prior_keys]
-    prior_keys.extend(missing_cateogries)
-    return prior_keys
+    old_categories = list(st.session_state['api']['ml'].get_priors().keys()) # Get existing categories in desc prior order
+    added_cateogries = [item for item in all_categories if item not in old_categories]
+    old_categories.extend(added_cateogries)
+    return old_categories
 
 def push_data():
     if st.session_state['api']['files'].add_transactions_to_database(edited_df, user_name=st.session_state['user'].name):

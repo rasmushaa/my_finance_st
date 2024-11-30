@@ -23,34 +23,39 @@ jobs:
         else
           echo "STREAMLIT_ENV=stg" >> $GITHUB_ENV
         fi
-        echo "GCP_PROJECT_ID=rasmus-prod" >> $GITHUB_ENV
 
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ secrets.GCP_UTILS_SA }}
+        credentials_json: ${{ secrets.GCP_DEPLOY_SA }}
 
     - name: Set up Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
-        project_id: ${{ env.GCP_PROJECT_ID }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configure Docker to use gcloud as a credential helper
       run: |
-        gcloud auth configure-docker europe-north1-docker.pkg.dev
+        gcloud auth configure-docker ${{ secrets.GCP_LOCATION }}-docker.pkg.dev
 
     - name: Build and Push Docker image
       run: |
-        IMAGE_URI="europe-north1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/streamlit-images/st-workout-${{ env.STREAMLIT_ENV  }}:latest"
+        IMAGE_URI="${{ secrets.GCP_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/streamlit-images/st-finance-${{ env.STREAMLIT_ENV  }}:latest"
         docker build -t "$IMAGE_URI" .
         docker push "$IMAGE_URI"
 
     - name: Deploy to Cloud Run
       run: |
-        gcloud run deploy st-workout-${{ env.STREAMLIT_ENV  }}  \
-          --image "europe-north1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/streamlit-images/st-workout-${{ env.STREAMLIT_ENV  }}:latest" \
+        gcloud run deploy st-finance-${{ env.STREAMLIT_ENV  }}  \
+          --image "${{ secrets.GCP_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/streamlit-images/st-finance-${{ env.STREAMLIT_ENV  }}:latest" \
           --platform managed \
-          --region europe-north1 \
+          --region ${{ secrets.GCP_LOCATION }} \
           --port 8080 \
-          --project "${{ env.GCP_PROJECT_ID }}" \
-          --set-env-vars "STREAMLIT_ENV=${{ env.STREAMLIT_ENV }}"
+          --project ${{ secrets.GCP_PROJECT_ID  }} \
+          --service-account ${{ secrets.GCP_MY_FINANCE_SA_NAME }} \
+          --set-env-vars STREAMLIT_ENV=${{ env.STREAMLIT_ENV }} \
+          --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+          --set-env-vars GCP_LOCATION=${{ secrets.GCP_LOCATION }} \
+          --set-env-vars GCP_BQ_DATASET=${{ secrets.GCP_BQ_DATASET }} \
+          --set-env-vars GCP_CGS_BUCKET=${{ secrets.GCP_CGS_BUCKET }} \
+          --set-env-vars GCP_CGS_BUCKET_DIR=${{ secrets.GCP_CGS_BUCKET_DIR }} 

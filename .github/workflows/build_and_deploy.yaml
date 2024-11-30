@@ -51,6 +51,9 @@ jobs:
           --platform managed \
           --region ${{ secrets.GCP_LOCATION }} \
           --port 8080 \
+          --memory 512Mi \
+          --cpu 0.25 \
+          --max-instances 1 \
           --project ${{ secrets.GCP_PROJECT_ID  }} \
           --service-account ${{ secrets.GCP_MY_FINANCE_SA_NAME }} \
           --set-env-vars STREAMLIT_ENV=${{ env.STREAMLIT_ENV }} \

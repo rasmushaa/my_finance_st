@@ -4,14 +4,9 @@ from frontend.utils import valid_user_state
 valid_user_state()
 
 
+st.subheader('Expenditure Categories')
+st.write(st.session_state['api']['categories'].get_expenditure_categories())
 
-def f1():
-    print('f1')
 
-def f2():
-    print('f2')
-
-st.title('Edit Categories')
-st.button('Button', on_click=f1)
-f2()
-print('end\n\n')
+st.subheader('Asset Categories')
+st.write(st.session_state['api']['categories'].get_asset_categories())

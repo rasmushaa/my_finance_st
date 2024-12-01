@@ -10,11 +10,11 @@ class CategoriesAPI():
     def get_expenditure_categories(self):
         sql = f"""
         SELECT
-            Name,
+            Name
         FROM 
             {self.__client._dataset}.d_category
         WHERE
-            Type = 'expenditure'
+            Type = 'transaction'
         GROUP BY
             1 -- Group for case of duplication
         """
@@ -25,7 +25,7 @@ class CategoriesAPI():
     def get_asset_categories(self):
         sql = f"""
         SELECT
-            Name,
+            Name
         FROM 
             {self.__client._dataset}.d_category
         WHERE

@@ -26,22 +26,6 @@ class FilesAPI(GoogleCloudAPI):
         return df
     
 
-    def add_filetype_to_databases(self, **kwargs) -> bool:
-        ''' Add a new supported filetype row to database.
-        
-        The ColumnNameString is a common string that contains all of the column names,
-        that is used to identify different file.
-        The table contains required information to select correct columns to run analysis.
-
-        Inputs
-        ------
-        Keyvalue-pairs
-            The key is going to be the column name, and value is the row value
-        '''
-        kwargs['ColumnNameString'] = ','.join(kwargs['ColumnNameString'])
-        self.__client.write_rows_to_table([kwargs], 'd_filetypes')
-
-
     def add_transactions_to_database(self, df: pd.DataFrame, user_name: str) -> bool:
         ''' Push one Banking file to database.
         
@@ -56,11 +40,40 @@ class FilesAPI(GoogleCloudAPI):
             The current active user
         '''
         df['Category'] = df['Category'].fillna('N/A') # Different missing values can have multiple values: Nan, Empty, etc. Thus, 'N/A' is selected to handle this
+        df['Receiver'] = df['Receiver'].fillna('missing') # There may be none fields in the data, but BigQuery does not allow those
         df['KeyUser'] = user_name
         df['CommitTimestamp'] = pd.Timestamp('now', tz='Europe/Helsinki')
         df = df[['KeyDate', 'KeyUser', 'Amount', 'Receiver', 'Category', 'CommitTimestamp']]
         try:
             self.__client.write_pandas_to_table(df, 'f_transactions')
+        except:
+            return False
+        return True
+    
+
+    def add_filetype_to_databases(self, collector) -> bool:
+        ''' Add a new supported filetype row to database.
+        
+        The ColumnNameString is a common string that contains all of the column names,
+        that is used to identify different file.
+        The table contains required information to select correct columns to run analysis.
+
+        Inputs
+        ------
+        collector
+            DataCollector object with filled values from GUI
+        '''
+        if not collector.no_nones(): # User must have inputted something to all possible entries
+            return False
+        
+        df_collection = collector.to_dataframe()
+
+        df_collection['my_index'] = 0
+        df_collection = df_collection.pivot(index='my_index', columns='key', values='value').reset_index(drop=True)
+        df_collection = df_collection[['KeyFileName', 'DateColumn', 'DateColumnFormat', 'AmountColumn', 'ReceiverColumn', 'ColumnNameString']]
+
+        try:
+            self.__client.write_pandas_to_table(df_collection, 'd_filetypes')
         except:
             return False
         return True
@@ -87,7 +100,7 @@ class FilesAPI(GoogleCloudAPI):
         
         df_collection = collector.to_dataframe()
 
-        df = pd.DataFrame(columns=['KeyDate', 'KeyUser', 'Category', 'Explanation', 'Value'])
+        df = pd.DataFrame(columns=['KeyDate', 'KeyUser', 'Category', 'Value'])
         df['Category'] = df_collection['key'].str.upper().str.replace('_', '-') # Keys back to BigQuery format
         df['Value'] = df_collection['value']
         df['KeyDate'] = date
@@ -114,6 +127,27 @@ class FilesAPI(GoogleCloudAPI):
         collector = DataCollector()
         collector.add_from_list(assets)
         return collector
+    
+
+    def get_filetype_data_collector(self):
+        ''' Init a class that has possble data entrys
+        as member variables.
+
+        Returns
+        -------
+        DataCollector() with FileType-categories
+        '''  
+        variables = [
+            'KeyFileName', 
+            'DateColumn', 
+            'DateColumnFormat', 
+            'AmountColumn', 
+            'ReceiverColumn', 
+            'ColumnNameString'
+            ]
+        collector = DataCollector()
+        collector.add_from_list(variables)
+        return collector
 
 
     def date_not_in_transactions_table(self, date, user_name: str):
@@ -135,8 +169,9 @@ class FilesAPI(GoogleCloudAPI):
         WHERE
             KeyUser = '{user_name}'
         '''
-        results = self.__client.sql_to_pandas(sql) # The Query Fails if the table does not exist -> return True instead
-        return date > results['date'][0]
+        latest_date = self.__client.sql_to_pandas(sql)['date'][0]
+        latest_date = pd.to_datetime(latest_date, format='%Y-%m-%d').date()
+        return (latest_date is None or pd.isnull(latest_date)) or (date > pd.to_datetime(latest_date, format='%Y-%m-%d').date()) # If there is data, validate
     
 
     def date_not_in_assets_table(self, date, user_name: str):
@@ -158,8 +193,9 @@ class FilesAPI(GoogleCloudAPI):
         WHERE
             KeyUser = '{user_name}'
         '''
-        results = self.__client.sql_to_pandas(sql)
-        return date > results['date'][0]
+        latest_date = self.__client.sql_to_pandas(sql)['date'][0]
+        latest_date = pd.to_datetime(latest_date, format='%Y-%m-%d').date()
+        return (latest_date is None or pd.isnull(latest_date)) or (date > pd.to_datetime(latest_date, format='%Y-%m-%d').date()) # If there is data, validate
 
     
     def transform_input_file(self, df: pd.DataFrame):

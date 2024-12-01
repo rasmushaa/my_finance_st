@@ -67,7 +67,6 @@ def main():
     bigquery.SchemaField('KeyId',       'INTEGER',  mode='REQUIRED'),
     bigquery.SchemaField('Type',        'STRING',   mode='REQUIRED'),
     bigquery.SchemaField('Name',        'STRING',   mode='REQUIRED'),
-    bigquery.SchemaField('Explanation', 'STRING',   mode='REQUIRED'),
     ]
     __create_table(dataset, 'd_category', schema, client)
 
@@ -94,6 +93,17 @@ def main():
     bigquery.SchemaField('CommitTimestamp', 'TIMESTAMP',    mode='REQUIRED'),
     ]
     __create_table(dataset, 'f_transactions', schema, client)
+
+
+    # 9. Create the Main Assets table
+    schema = [
+    bigquery.SchemaField('KeyDate',         'DATE',         mode='REQUIRED'),
+    bigquery.SchemaField('KeyUser',         'STRING',       mode='REQUIRED'),
+    bigquery.SchemaField('Category',        'STRING',       mode='REQUIRED'),
+    bigquery.SchemaField('Value',           'FLOAT',        mode='REQUIRED'),
+    bigquery.SchemaField('CommitTimestamp', 'TIMESTAMP',    mode='REQUIRED'),
+    ]
+    __create_table(dataset, 'f_assets', schema, client)
 
 
 

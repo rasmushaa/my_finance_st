@@ -100,7 +100,7 @@ def main():
     bigquery.SchemaField('KeyDate',         'DATE',         mode='REQUIRED'),
     bigquery.SchemaField('KeyUser',         'STRING',       mode='REQUIRED'),
     bigquery.SchemaField('Category',        'STRING',       mode='REQUIRED'),
-    bigquery.SchemaField('Value',           'INTEGER',      mode='REQUIRED'),
+    bigquery.SchemaField('Value',           'FLOAT',        mode='REQUIRED'),
     bigquery.SchemaField('CommitTimestamp', 'TIMESTAMP',    mode='REQUIRED'),
     ]
     __create_table(dataset, 'f_assets', schema, client)

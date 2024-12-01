@@ -40,6 +40,7 @@ class FilesAPI(GoogleCloudAPI):
             The current active user
         '''
         df['Category'] = df['Category'].fillna('N/A') # Different missing values can have multiple values: Nan, Empty, etc. Thus, 'N/A' is selected to handle this
+        df['Receiver'] = df['Receiver'].fillna('missing') # There may be none fields in the data, but BigQuery does not allow those
         df['KeyUser'] = user_name
         df['CommitTimestamp'] = pd.Timestamp('now', tz='Europe/Helsinki')
         df = df[['KeyDate', 'KeyUser', 'Amount', 'Receiver', 'Category', 'CommitTimestamp']]

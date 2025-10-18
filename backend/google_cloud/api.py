@@ -4,7 +4,7 @@ import pandas_gbq
 from google.cloud import bigquery
 from google.cloud import storage
 
-DEBUG = True
+DEBUG = False
 
 
 class GoogleCloudAPI():

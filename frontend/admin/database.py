@@ -21,6 +21,7 @@ def run_deletion():
         time.sleep(5)
     st_wrapper_get_all_push_insertions.clear()
     st.session_state.pop('to_delete')
+    st.rerun()
 
 
 st.set_page_config(layout="wide")
@@ -31,7 +32,7 @@ col.title('Transaction Insertations Log')
 df = st_wrapper_get_all_push_insertions()
 df['selection'] = False
 
-group = col.container(horizontal=True)
+group = col.container(horizontal=True, width='stretch')
 users = group.pills('Users', df['KeyUser'].unique().tolist(), selection_mode='multi', default=df['KeyUser'].unique().tolist())
 files = group.pills("Tables", df['TableName'].unique().tolist(), selection_mode='multi', default=df['TableName'].unique().tolist())
 
@@ -98,11 +99,11 @@ if edited_df['selection'].any():
 
         st.divider()
 
-        if st.button('Delete Selected Insertations', use_container_width=True):
+        if st.button('Delete Selected Insertations', width='stretch'):
             st.session_state['to_delete'] = edited_df[edited_df['selection']]
 
         if 'to_delete' in st.session_state:
             st.warning('This action is irreversible! All data associated with the selected insertations will be permanently deleted from the database.', icon='⚠️')
-            if st.button('ARE YOU SURE?', type='primary', use_container_width=True):
+            if st.button('ARE YOU SURE?', type='primary', width='stretch'):
                 with st.spinner('Removing data...', show_time=True):
                     run_deletion()

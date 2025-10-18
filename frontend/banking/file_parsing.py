@@ -65,13 +65,13 @@ edited_df = st.data_editor(
             max_value=1.0,
         ),
     },
-    use_container_width=True,
+    width='stretch',
     hide_index=True,
     height=35*len(st.session_state['banking_file'])+38
 )
 
 
-if st.button('Upload the file', use_container_width=True):
+if st.button('Upload the file', width='stretch'):
 
     if st.session_state['api']['files'].date_not_in_transactions_table(edited_df['KeyDate'].min(), user_name=st.session_state['user'].name): # Check for duplicated Dates
         push_data()
@@ -79,6 +79,6 @@ if st.button('Upload the file', use_container_width=True):
     else:
         st.error(f"There already exists DATE after '{edited_df['KeyDate'].min()}' for user '{st.session_state['user'].name}'")
 
-        st.button('Force Push Data?', on_click=push_data, use_container_width=True)
+        st.button('Force Push Data?', on_click=push_data, width='stretch')
 
 

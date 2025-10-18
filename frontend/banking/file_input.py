@@ -2,6 +2,7 @@ import streamlit as st
 import time
 from frontend.utils import valid_user_state
 
+st.set_page_config(layout='centered')
 valid_user_state()
 
 

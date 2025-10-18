@@ -3,7 +3,7 @@ from .user import User
 from backend.google_cloud.api import GoogleCloudAPI
 
 
-class CredentialsAPI():
+class Authentication():
     def __init__(self):
         self.__client = GoogleCloudAPI()
 

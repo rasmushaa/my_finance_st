@@ -1,7 +1,7 @@
 from backend.google_cloud.api import GoogleCloudAPI
 
 
-class CategoriesAPI():
+class Categories():
 
     def __init__(self):
         self.__client = GoogleCloudAPI()

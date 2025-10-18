@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from frontend.utils import valid_user_state
 
+st.set_page_config(layout='centered')
 valid_user_state()
 
 
@@ -28,12 +29,12 @@ def add_trace(name, value, fig, color):
         )
     )
 
-@st.cache_data
+@st.cache_resource
 def st_wrapper_get_collector():
-    return st.session_state['api']['files'].get_asset_data_collector()
+    return st.session_state.backend.filesystem.database.get_asset_data_collector()
 
 def push_data():
-    if st.session_state['api']['files'].add_assets_to_database(date, st.session_state['user'].name, collector):
+    if st.session_state.backend.filesystem.database.add_assets_to_database(date, st.session_state['user'].name, collector):
         st.success('File added successfully')
     else:
         st.error('File was not uploaded!')
@@ -99,7 +100,7 @@ collector.dividends = st.number_input('Received Dividens', value=0, min_value=0)
 st.header('Uppload all Metrics')
 if st.button('Push'):
 
-    if st.session_state['api']['files'].date_not_in_assets_table(date, user_name=st.session_state['user'].name): # Check for duplicated Dates
+    if st.session_state.backend.filesystem.database.date_not_in_assets_table(date, user_name=st.session_state['user'].name): # Check for duplicated Dates
         push_data()
 
     else:

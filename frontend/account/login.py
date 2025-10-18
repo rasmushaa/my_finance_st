@@ -30,9 +30,9 @@ if st.button('Login', icon=":material/login:"):
 
     validate_captcha_color(user_rgb_color, target_rgb, draw_new_color_if_failed=True)
 
-    if st.session_state['api']['credentials'].username_and_password_match(username, password_hash):
+    if st.session_state.backend.auth.username_and_password_match(username, password_hash):
         st.success('Login successful')
-        st.session_state['user'] = st.session_state['api']['credentials'].init_user(username, password_hash)
+        st.session_state['user'] = st.session_state.backend.auth.init_user(username, password_hash)
         st.switch_page('frontend/banking/file_input.py')
     
     else:

@@ -8,7 +8,7 @@ from backend.google_cloud.api import GoogleCloudAPI
 
 
 
-class MLAPI():
+class ML():
     def __init__(self):
         self.__client = GoogleCloudAPI()
         self.__model = None

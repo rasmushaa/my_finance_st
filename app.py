@@ -1,9 +1,6 @@
 import streamlit as st
 from frontend import sidebar
-from backend.categories.api import CategoriesAPI
-from backend.credentials.api import CredentialsAPI
-from backend.ml.api import MLAPI
-from backend.files.api import FilesAPI
+import backend
 
 
 # Main entry-point and the event-loop, that runs only once.
@@ -15,14 +12,9 @@ from backend.files.api import FilesAPI
 # because that is dynamically changed in the code.
 
 
-def init_apis():
-    if 'api' not in st.session_state:
-        st.session_state['api'] = {}
-        st.session_state['api']['credentials']  = CredentialsAPI()
-        st.session_state['api']['categories']   = CategoriesAPI()
-        st.session_state['api']['ml']           = MLAPI()
-        st.session_state['api']['files']        = FilesAPI()
-
+def init_backend():
+    if 'backend' not in st.session_state:
+        st.session_state['backend'] = backend
 
 # Application Constants
 st.set_page_config(page_title='My Finance')
@@ -35,7 +27,8 @@ all_pages = [
     st.Page('frontend/banking/file_parsing.py'),
     st.Page('frontend/assets/uppload_file.py'),
     st.Page('frontend/admin/ai.py'),
-    st.Page('frontend/admin/categories.py')
+    st.Page('frontend/admin/categories.py'),
+    st.Page('frontend/admin/database.py'),
 ]
 
 pg = st.navigation(
@@ -43,7 +36,7 @@ pg = st.navigation(
     position='hidden'
 )
 
-init_apis() # Initialize All Backend APIs right away
+init_backend()
 
 sidebar.init_to_user_access_level() # Update the navigation accordingly to the user access level after each reload/page switch
 

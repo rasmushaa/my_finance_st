@@ -49,7 +49,9 @@ st.session_state.backend.ml.train_new_model(df_train, target_col='category')
 
 # Save the model
 if st.button('Save the Model', width='stretch'):
-    st.session_state.backend.ml.save_model_to_gcs()
+    with st.spinner('Sending data...', show_time=True):
+        st.session_state.backend.ml.save_model_to_gcs()
+        st.toast('Model Saved Successfully!', icon='✅', duration='long')
 
 
 # Results section

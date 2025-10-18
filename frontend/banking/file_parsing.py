@@ -27,7 +27,7 @@ def category_formatter(category):
     mapping = {
         'HOUSEHOLD-ITEMS': '🛋️ - ' + category,
         'TECHNOLOGY': '💻 - ' + category,
-        'HEALTH': '⚕️ - ' + category,
+        'HEALTH': '💊 - ' + category,
         'COMMUTING': '🚃 - ' + category,
         'CLOTHING': '👕 - ' + category,
         'SALARY': '💶 - ' + category,
@@ -42,10 +42,11 @@ def category_formatter(category):
     return mapping.get(category, category)
 
 def push_data():
-    if st.session_state.backend.filesystem.database.add_transactions_to_database(edited_df, user_name=st.session_state['user'].name):
-            st.success('File added successfully')
-    else:
-        st.error('File was not uploaded!')
+    with st.spinner('Sending data...', show_time=True):
+        if st.session_state.backend.filesystem.database.add_transactions_to_database(edited_df, user_name=st.session_state['user'].name):
+                st.toast('File was uploaded successfully!', icon='✅', duration='long')
+        else:
+            st.toast('Failure during upload!', icon='⚠️', duration='infinite')
 
 
 

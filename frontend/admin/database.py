@@ -10,30 +10,36 @@ valid_user_state()
 def st_wrapper_get_all_push_insertions():
     return st.session_state.backend.filesystem.database.get_all_push_insertions()
 
-def run_deletion(to_delete: pd.DataFrame):
-    for _, row in to_delete.iterrows():
+def run_deletion():
+    for _, row in st.session_state['to_delete'].iterrows():
         st.session_state.backend.filesystem.database.delete_push_insertion(
             user_name=row['KeyUser'],
             commit_timestamp=row['CommitTimestamp'],
             table=row['TableName']
         )
+        st.toast(f'{row["KeyUser"]} - {row["TableName"]} - {row["CommitTimestamp"]}', icon='🗑️', duration='infinite')
+        time.sleep(5)
     st_wrapper_get_all_push_insertions.clear()
+    st.session_state.pop('to_delete')
 
 
 st.set_page_config(layout="wide")
 _, col, _ = st.columns([1,2,1])
 
 col.title('Transaction Insertations Log')
-col.header('Select insertation batch to be deleted')
 
 df = st_wrapper_get_all_push_insertions()
 df['selection'] = False
 
-df['CommitTimestamp'] = pd.to_datetime(df['CommitTimestamp'], format='%Y-%m-%d %H:%M:%S')
-df = df.sort_values(by=['KeyUser', 'TableName', 'CommitTimestamp']).reset_index(drop=True)
+group = col.container(horizontal=True)
+users = group.pills('Users', df['KeyUser'].unique().tolist(), selection_mode='multi', default=df['KeyUser'].unique().tolist())
+files = group.pills("Tables", df['TableName'].unique().tolist(), selection_mode='multi', default=df['TableName'].unique().tolist())
 
+df_selection = df.loc[df['KeyUser'].isin(users) & df['TableName'].isin(files)]
+
+col.header('Select insertation batch to be deleted')
 edited_df = col.data_editor(
-    df,
+    df_selection.reset_index(drop=True),
     column_config={
         'KeyUser': st.column_config.Column(
             'Username',
@@ -76,7 +82,7 @@ edited_df = col.data_editor(
 
     },
     hide_index=True,
-    height=35*df.shape[0] + 38
+    height=35*df_selection.shape[0] + 38
 )
 
 if edited_df['selection'].any():
@@ -93,8 +99,10 @@ if edited_df['selection'].any():
         st.divider()
 
         if st.button('Delete Selected Insertations', use_container_width=True):
-            to_delete = edited_df[edited_df['selection']]
-            if st.button('ARE YOU SURE?', type='primary', use_container_width=True, on_click=run_deletion, args=(to_delete,)):
-                st.success('Selected insertations have been deleted successfully!')
-                #time.sleep(1.0)
-                #st.rerun()
+            st.session_state['to_delete'] = edited_df[edited_df['selection']]
+
+        if 'to_delete' in st.session_state:
+            st.warning('This action is irreversible! All data associated with the selected insertations will be permanently deleted from the database.', icon='⚠️')
+            if st.button('ARE YOU SURE?', type='primary', use_container_width=True):
+                with st.spinner('Removing data...', show_time=True):
+                    run_deletion()

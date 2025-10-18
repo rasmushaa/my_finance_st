@@ -41,7 +41,7 @@ def validate_filetype() -> bool:
         collector.AmountColumn = st_col2.selectbox('Amount-Column', cols)
         collector.ColumnNameString = ','.join(cols)
 
-        if st.button('Add the Filetype to the Database', use_container_width=True):
+        if st.button('Add the Filetype to the Database', width='stretch'):
             if st.session_state['api']['files'].add_filetype_to_databases(collector):    
                 st_wrapper_filetype_in_database.clear(st.session_state['banking_file']) # Clear for rerunning
                 st.success('The filetype was uploaded succesfully')

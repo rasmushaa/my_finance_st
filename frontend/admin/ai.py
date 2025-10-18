@@ -35,7 +35,7 @@ df = df.drop('date', axis=1) # Remove the date, that is only used to select the 
 
 # Display the selected training data
 st.subheader(f'Selected Training Data: {df.shape[0]} Rows')
-st.dataframe(df, use_container_width=True)
+st.dataframe(df, width='stretch')
 
 # Train Valid Split
 st.subheader('Training-Validation Split')
@@ -47,7 +47,7 @@ df_valid = df.iloc[int(df.shape[0] * ratio):]
 st.session_state['api']['ml'].train_new_model(df_train, target_col='category')
 
 # Save the model
-if st.button('Save the Model', use_container_width=True):
+if st.button('Save the Model', width='stretch'):
     st.session_state['api']['ml'].save_model_to_gcs()
 
 
@@ -92,7 +92,7 @@ st.dataframe(
             max_value=1.0,
         ),
     },
-    use_container_width=True
+    width='stretch'
 )
 
 # Print all Likelihoods as JSON

@@ -85,6 +85,7 @@ with col3:
 
     fig.update_layout(barmode='relative',height=800)
     st.plotly_chart(fig, use_container_width=True)
+    
 
 
 # Investment performance inputs
@@ -104,4 +105,4 @@ if st.button('Push'):
     else:
         st.error(f"There already exists DATE after '{date}' for user '{st.session_state['user'].name}'")
 
-        st.button('Force Push Data?', on_click=push_data, use_container_width=True)
+        st.button('Force Push Data?', on_click=push_data, width='stretch')

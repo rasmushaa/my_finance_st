@@ -4,7 +4,7 @@ import pandas_gbq
 from google.cloud import bigquery
 from google.cloud import storage
 
-DEBUG = False
+DEBUG = True
 
 
 class GoogleCloudAPI():
@@ -14,6 +14,16 @@ class GoogleCloudAPI():
         self.__location = os.getenv('GCP_LOCATION')
         self.__bucket_name = os.getenv('GCP_CGS_BUCKET')
         self.__bucket_dir = os.getenv('GCP_CGS_BUCKET_DIR')
+
+
+    def sql_query(self, sql: str) -> bigquery.table.RowIterator:
+        ''' Run a regular SQL query 
+        and return a RowIterator.
+        '''
+        self.__debug(sql=sql)
+        client = bigquery.Client(location=self.__location, project=self.__project_id) # Use default Account/Cloud Run SA
+        query_job = client.query(sql)
+        return query_job.result()
 
 
     def sql_to_pandas(self, sql: str) -> pd.DataFrame:
@@ -70,37 +80,6 @@ class GoogleCloudAPI():
                           table_schema=table_schema,
                           if_exists='append',
                           ) # Use default Account/Cloud Run SA
-    
-
-    def write_rows_to_table(self, rows_to_insert: list, table: str) -> bool:
-        ''' Write rows to an existing table.
-
-        Note, writing one row from the list may fail, but others are completed successfully.
-        
-        Inputs
-        ------
-        rows_to_insert : list[dict]
-            A DataBase row in a dict format
-        table: str
-            The name of the destination Table, that is used together with initial project parameters
-
-        Returns
-        -------
-        success: bool
-            If the insert operation results any errors, those a printed and False is returned
-        '''
-        self.__debug(rows=rows_to_insert, table=table)
-        client = bigquery.Client(location=self.__location) # Use default Account/Cloud Run SA
-        
-        table_id = f'{self.__project_id }.{self._dataset}.{table}'
-
-        errors = client.insert_rows_json(table_id, rows_to_insert)
-
-        if len(errors) > 0:
-            print(f'Writing rows to table failed: {errors}')
-            return False
-        else:
-            return True
         
     
     def upload_file_to_gcs(self, local_file_path: str):

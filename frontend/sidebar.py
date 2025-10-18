@@ -16,6 +16,7 @@ def __authenticated_menu():
     st.sidebar.subheader('Manage Application:')
     st.sidebar.page_link(st.Page('frontend/admin/ai.py'), label='AI', icon=':material/robot_2:', disabled=disabled)
     st.sidebar.page_link(st.Page('frontend/admin/categories.py'), label='Categories', icon=':material/settings:', disabled=disabled)
+    st.sidebar.page_link(st.Page('frontend/admin/database.py'), label='Database', icon=':material/database:', disabled=disabled)
 
 
 

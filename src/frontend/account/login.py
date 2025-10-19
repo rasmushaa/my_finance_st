@@ -7,9 +7,10 @@ from frontend.utils import init_random_captcha_color,  validate_captcha_color
 # Dynamic Header, that indicates the ENVIRONMENT
 env = os.getenv('STREAMLIT_ENV')
 env_siffix = '' if env=='prod' else ': STG' if env=='stg' else ': DEV' if env=='dev' else 'EnvVariable NotFound!' 
+st.set_page_config(layout='centered')
 col1, col2 = st.columns([3, 1])
 col1.title(f'My Finance App{env_siffix}')
-col2.image('frontend/app_assets/logo.png')
+col2.image('src/frontend/app_assets/logo.png')
 
 
 # User login input, that hashes the password

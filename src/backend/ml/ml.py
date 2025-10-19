@@ -215,10 +215,11 @@ class ML():
             the propability, and some deviation is allowed when computing the 
             overall accuracy (usefulnes) of the model
         """
-        def get_accuracy(df_group):
-            count = df_group.shape[0]
-            trues = df_group.loc[df_group['acceptable'] == True].shape[0]
-            return trues / count
+        def get_accuracy(series):
+            count = series.shape[0]
+            if count == 0:
+                return 0.0
+            return float(series.sum()) / count
 
         errors = []
         labels = []
@@ -232,7 +233,7 @@ class ML():
 
         df_accuracy = df_errors.copy()
         df_accuracy['acceptable'] = df_accuracy['order'] <= accepted_error
-        df_accuracy = df_accuracy.groupby(['y_valid']).apply(lambda x: get_accuracy(x)).rename('accuracy').reset_index()
+        df_accuracy = df_accuracy.groupby(['y_valid'])['acceptable'].apply(lambda x: get_accuracy(x)).rename('accuracy').reset_index()
         
         df_stats = df_errors.groupby('y_valid').agg(count=('order', 'count'),
                                                     place_q50=('order', lambda x: np.percentile(x, 50)),

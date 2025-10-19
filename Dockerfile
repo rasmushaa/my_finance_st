@@ -1,11 +1,11 @@
 # Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
-# Set the working directory in the container
-WORKDIR /app
+# Copy the source code contents into the container
+COPY ./src /src
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy the requirements.in file into the container
+COPY ./requirements.in /requirements.in
 
 # Install pip-tools to compile requirements.in
 RUN pip install --no-cache-dir pip-tools
@@ -23,4 +23,4 @@ RUN pip-sync
 EXPOSE 8080
 
 # Run Streamlit when the container launches
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.headless=true"]
+CMD ["streamlit", "run", "src/app.py", "--server.port=8080", "--server.headless=true"]

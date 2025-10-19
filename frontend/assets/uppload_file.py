@@ -34,10 +34,11 @@ def st_wrapper_get_collector():
     return st.session_state.backend.filesystem.database.get_asset_data_collector()
 
 def push_data():
-    if st.session_state.backend.filesystem.database.add_assets_to_database(date, st.session_state['user'].name, collector):
-        st.success('File added successfully')
-    else:
-        st.error('File was not uploaded!')
+    with st.spinner('Uploading data...', show_time=True):
+        if st.session_state.backend.filesystem.database.add_assets_to_database(date, st.session_state['user'].name, collector):
+            st.toast('Data uploaded successfully!', icon='✅', duration='long')
+        else:
+            st.toast('Error uploading data!', icon='❌', duration='infinite')
 
 
 # The page
@@ -61,7 +62,8 @@ with col1:
     collector.cash = st.number_input('Cash', value=0, min_value=0)
     collector.apartment = st.number_input('Apartment', value=0, min_value=0)
     collector.capital_assets_purchase_price = st.number_input('Capital Assets Purchase price', value=0, min_value=0)
-    collector.unrealized_capital_gains = st.number_input('Capital Assets Unrealized Gains', value=0)
+    market_value = st.number_input('Capital Assets Market value', value=0)
+    collector.unrealized_capital_gains = market_value - collector.capital_assets_purchase_price
     collector.other_assets = st.number_input('Other-Assets', value=0, min_value=0)
 
     st.subheader('Total Liabilities')

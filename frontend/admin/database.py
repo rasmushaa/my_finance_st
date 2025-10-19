@@ -1,15 +1,9 @@
 import streamlit as st
-import time
-import pandas as pd
 from frontend.utils import valid_user_state
 
 valid_user_state()
 
 # Utlity function to run deletion
-@st.cache_data()
-def st_wrapper_get_all_push_insertions():
-    return st.session_state.backend.filesystem.database.get_all_push_insertions()
-
 def run_deletion():
     for _, row in st.session_state['to_delete'].iterrows():
         st.session_state.backend.filesystem.database.delete_push_insertion(
@@ -18,8 +12,6 @@ def run_deletion():
             table=row['TableName']
         )
         st.toast(f'{row["KeyUser"]} - {row["TableName"]} - {row["CommitTimestamp"]}', icon='🗑️', duration='infinite')
-        time.sleep(5)
-    st_wrapper_get_all_push_insertions.clear()
     st.session_state.pop('to_delete')
     st.rerun()
 
@@ -29,7 +21,7 @@ _, col, _ = st.columns([1,2,1])
 
 col.title('Transaction Insertations Log')
 
-df = st_wrapper_get_all_push_insertions()
+df = st.session_state.backend.filesystem.database.get_all_push_insertions()
 df['selection'] = False
 
 group = col.container(horizontal=True, width='stretch')
@@ -94,7 +86,7 @@ if edited_df['selection'].any():
         st.dataframe(
             edited_df[edited_df['selection']],
             hide_index=True,
-            use_container_width=True
+            width='stretch'
         )
 
         st.divider()

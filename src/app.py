@@ -18,7 +18,7 @@ def init_backend():
 
 # Application Constants
 st.set_page_config(page_title='My Finance')
-st.logo('frontend/app_assets/logo.png', size='large')
+st.logo('src/frontend/app_assets/logo.png', size='large')
 
 all_pages = [
     st.Page('frontend/account/login.py', default=True),

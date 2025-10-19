@@ -41,7 +41,7 @@ run_dev() {
     kill_previous_streamlit
     echo "Running in DEV environment..."
     load_env
-    streamlit run app.py --server.port 8080
+    streamlit run src/app.py --server.port 8080
 }
 
 

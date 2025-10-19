@@ -51,7 +51,8 @@ class FileParser:
         df.rename(columns={filetype['DateColumn']: 'KeyDate', filetype['ReceiverColumn']: 'Receiver', filetype['AmountColumn']: 'Amount'}, inplace=True)
 
         df['KeyDate'] = pd.to_datetime(df['KeyDate'], format=filetype['DateColumnFormat']).dt.date
-        df['Amount'] = df['Amount'].str.replace(',', '.').astype(float) if df['Amount'].str.contains(',').any() else df['Amount'].astype(float) # Decimael ',' to '.' float
+        if df['Amount'].dtype == 'object':
+            df['Amount'] = df['Amount'].str.replace(',', '.').astype(float) if df['Amount'].str.contains(',').any() else df['Amount'].astype(float) # Decimal ',' to '.' float
         df['Category'] = None
 
         df = df[['KeyDate', 'Amount', 'Receiver', 'Category']].copy()

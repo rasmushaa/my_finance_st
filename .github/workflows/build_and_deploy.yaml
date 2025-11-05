@@ -6,6 +6,9 @@ on:
       - main
       - stg
 
+permissions:
+  contents: write  # required to push to gh-pages
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -62,3 +65,9 @@ jobs:
           --set-env-vars GCP_BQ_DATASET=${{ secrets.GCP_BQ_DATASET }} \
           --set-env-vars GCP_CGS_BUCKET=${{ secrets.GCP_CGS_BUCKET }} \
           --set-env-vars GCP_CGS_BUCKET_DIR=${{ secrets.GCP_CGS_BUCKET_DIR }} 
+
+    - name: Deploy MkDocs (only on main)
+      if: github.ref_name == 'main'
+      run: |
+        pip install mkdocs-material mkdocstrings[python] mkdocs-gen-files mkdocs-literate-nav
+        mkdocs gh-deploy --force

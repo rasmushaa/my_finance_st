@@ -1,5 +1,7 @@
 # My Finance - Streamlit application
 
+[![Docs](https://img.shields.io/badge/backend-API-red.svg)](https://rasmushaa.github.io/my_finance_st/)
+
 ## 📑 Table of Contents
 - [Overview](#overview)
 - [Feature Demos](#feature-demos)
